@@ -14,11 +14,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('CodenJobs App'),
+        title: const Text('sungroup'),
       ),
       body: WebView(
         javascriptMode: JavascriptMode.unrestricted,
-        initialUrl: "https://codenjobs.com",
+        initialUrl: "https://dautu-sungroup.com",
         onWebViewCreated: (controller) {
           this.controller = controller;
         },

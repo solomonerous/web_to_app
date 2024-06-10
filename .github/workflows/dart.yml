@@ -65,4 +65,4 @@ jobs:
          cache: false
     # The architecture of Flutter SDK executable (x64 or arm64)
          architecture: ${{ runner.arch }} 
-        run: flutter build apk
+

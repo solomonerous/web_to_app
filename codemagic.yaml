@@ -1,4 +1,4 @@
-name: Build and Deploy Flutter Webview App
+name: Flutter CI/CD with Environment Setup
 
 on:
   push:
@@ -7,7 +7,53 @@ on:
     branches: [ main ]
 
 jobs:
+  setup-environment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Flutter and Dart SDKs
+        run: |
+          curl -fsSl https://raw.githubusercontent.com/shan-shaji/setup-flutter/main/setup_flutter | /bin/bash
+          dart --version
+          flutter --version
+
+      - name: Install Android SDK and Tools
+        run: |
+          sudo chmod +x ./flutter_project/android/install-sdk-tools.sh
+          sudo ./flutter_project/android/install-sdk-tools.sh --install-dir="$ANDROID_SDK_ROOT" --sdk-tools-version="7504922"
+          echo "y" | sdkmanager --licenses
+          sdkmanager "build-tools;30.0.3" "platforms;android-30" "platforms;android-28"
+
+      - name: Install iOS Dependencies
+        run: |
+          sudo gem install cocoapods
+          pod --version
+          pod repo update
+          cd ios
+          pod install
+          cd ..
+
+      - name: Cache Pub Dependencies
+        uses: actions/cache@v2
+        with:
+          path: $FLUTTER_HOME/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - nameuFF: Run tests
+        run: flutter test
+
   build-and-deploy:
+    needs: setup-environment
     runs-on: ubuntu-latest
 
     steps:
@@ -16,10 +62,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v1
         with:
-          channel: 'stable' # Or 'beta', 'dev' or 'master'
-
-      - name: Install dependencies
-        run: flutter pub get
+          channel: 'stable' # Or 'beta', 'dev', or 'master'
 
       - name: Build iOS IPA
         run: |
@@ -33,7 +76,7 @@ jobs:
 
       - name: Build Android APK
         run: flutter build apk --release
-        working-Coefficient: ./flutter_project
+        working-directory: ./flutter_project
 
       - name: Deploy to App Store and Google Play
         uses: wzieba/Deploy-Flutter-App@v1

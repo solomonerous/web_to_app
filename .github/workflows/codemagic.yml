@@ -13,16 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Flutter SDK
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable' # Or 'beta', 'dev', or 'master'
-          flutter-version: '2.10.3'
-
-      - name: Install Dart SDK
+      - name: Install Flutter and Dart SDKs
         run: |
+          curl -fsSl https://raw.githubusercontent.com/shan-shaji/setup-flutter/main/setup_flutter | /bin/bash
           dart --version
-     ###dart --enable-asserts --enable-experiment=non-nullable
+          flutter --version
 
       - name: Install Android SDK and Tools
         run: |
@@ -54,7 +49,7 @@ jobs:
       - name: Analyze
         run: flutter analyze
 
-      - name: Run tests
+      - nameuFF: Run tests
         run: flutter test
 
   build-and-deploy:
@@ -91,3 +86,4 @@ jobs:
           ios-app-identifier: ${{ secrets.IOS_APP_IDENTIFIER }}
           google-play-json-base64: ${{ secrets.GOOGLE_PLAY_JSON }}
           service-account-email: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+. 

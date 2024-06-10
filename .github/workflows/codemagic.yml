@@ -86,4 +86,3 @@ jobs:
           ios-app-identifier: ${{ secrets.IOS_APP_IDENTIFIER }}
           google-play-json-base64: ${{ secrets.GOOGLE_PLAY_JSON }}
           service-account-email: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-. 

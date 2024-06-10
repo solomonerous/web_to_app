@@ -22,7 +22,7 @@ jobs:
       - name: Install Dart SDK
         run: |
           dart --version
-          dart --enable-asserts --enable-experiment=non-nullable
+     ###dart --enable-asserts --enable-experiment=non-nullable
 
       - name: Install Android SDK and Tools
         run: |

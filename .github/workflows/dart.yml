@@ -63,10 +63,6 @@ jobs:
          channel: stable
     # Cache the Flutter SDK
          cache: false
-    # Identifier for the Flutter SDK cache
-         cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:
-    # Identifier for the Dart .pub-cache cache
-         pub-cache-key: flutter-pub:os:-:channel:-:version:-:arch:-:hash:
     # Flutter SDK cache path
          cache-path: ${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:
       # Flutter pub cache path

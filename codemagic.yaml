@@ -1,11 +1,38 @@
-name: Flutter CI/CD with Environment Setup
+name: Flutter Setup
 
+on:
+  push:
+    branches: [ main ]  # Or any branch you want to trigger the setup
+
+jobs:
+  setup-flutter:
+    runs-on: ubuntu-latest  # Or macos-latest for iOS builds
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable' # Or 'beta', 'dev' as needed
+          cache: true
+
+      - name: Install Android SDK Components
+        uses: android-actions/setup-android@v2
+
+      - name: Build Runner
+        run: flutter pub run build_runner build --delete-conflicting-outputs
+
+      - name: Gradlew permissions
+        run: chmod +x ./android/gradlew
+
+      - name: Gradle build (release)
+        run: ./android/gradlew build
+
+name: Flutter CI/CD with Environment Setup
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   setup-environment:
     runs-on: ubuntu-latest
@@ -38,18 +65,14 @@ jobs:
       - name: Cache Pub Dependencies
         uses: actions/cache@v2
         with:
-          path: $FLUTTER_HOME/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
+          
       - name: Get Flutter dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze
 
-      - nameuFF: Run tests
+      - name: Run tests
         run: flutter test
 
   build-and-deploy:

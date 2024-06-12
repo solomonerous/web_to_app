@@ -1,19 +1,14 @@
 name: Setup Flutter Environment
-
 on: [push]
-
 jobs:
   setup-flutter:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest]
         include:
           - os: windows-latest
             flutter_path: 'C:\development\flutter\'
-          - os: ubuntu-latest
-            flutter_path: '/snap/flutter/current/usr/share/flutter'
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2

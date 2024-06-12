@@ -1,0 +1,82 @@
+name: Setup Flutter Environment on Windows
+
+on: [push]
+
+jobs:
+  setup-flutter:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Chocolatey
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallChocolatey
+        run: | choco install chocolateygui
+      - name: Update Chocolatey
+        run: | choco upgrade chocolatey -y
+      - name: Install Chocolatey's extension
+        run: | choco install winget-cli
+        run: | choco install vcredist140
+        run: | choco install chocolatey-windowsupdate.extension
+        run: | choco install chocolatey-core.extension
+        run: | choco install googlechrome
+        run: | choco install kb2999226
+        run: | choco install vcredist2015
+        run: | choco install visualstudio2017-workload-vctools
+        run: | choco install visualstudio2019buildtools
+        run: | choco install visualstudio2019-workload-vctools
+        run: | choco install chocolatey-compatibility.extension
+
+        run: | choco install maven
+        run: | choco install flutter
+        run: | choco install dart-sdk
+        run: | choco install dotnetfx
+        run: | choco install dotnet4.5
+        run: | choco install netfx-4.7.2
+        run: | choco install 7zip.install
+        run: | choco install git
+        run: | choco install openjdk
+        run: | choco install nodejs-lts
+
+        run: | choco install pwsh-core
+
+        run: | choco install chromium
+
+        run: | choco install pswindowsupdate
+
+        run: | choco install cmake.install
+        run: | choco install openssl.light
+        run: | choco install cygwin
+        run: | choco install microsoft-ui-xaml-2-7
+        run: | choco install gradle
+        run: | choco install mingw
+
+      - name: Install common packages
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallPackage 'git' 'openjdk11' 'python' 'visualstudiocode'
+
+      - name: Install Python packages
+        run: |
+          python -m pip install --upgrade pip wheel
+
+      - name: Install Flutter
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallFlutter 'C:\development\flutter\'
+
+      - name: Install Android SDK
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallAndroidSDK
+
+      - name: Install Build Tools
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallBuildTools
+
+      - name: Install Chrome
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallChrome
+
+      - name: Check Flutter setup and fix issues
+        run: |
+          pwsh -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -CheckFlutterDoctor

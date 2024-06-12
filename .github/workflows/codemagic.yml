@@ -1,88 +1,56 @@
-name: Flutter CI/CD with Environment Setup
+name: Setup Flutter Environment
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push]
 
 jobs:
-  setup-environment:
-    runs-on: ubuntu-latest
+  setup-flutter:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            flutter_path: 'C:\development\flutter\'
+          - os: ubuntu-latest
+            flutter_path: '/snap/flutter/current/usr/share/flutter'
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Install Flutter and Dart SDKs
+      - name: Install Chocolatey (Windows)
+        if: runner.os == 'Windows'
         run: |
-          curl -fsSl https://raw.githubusercontent.com/shan-shaji/setup-flutter/main/setup_flutter | /bin/bash
-          dart --version
-          flutter --version
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallChocolatey
 
-      - name: Install Android SDK and Tools
+      - name: Update Chocolatey
+        if: runner.os == 'Windows'
+        run: choco upgrade chocolatey -y
+
+      - name: Install common packages
         run: |
-          sudo chmod +x ./flutter_project/android/install-sdk-tools.sh
-          sudo ./flutter_project/android/install-sdk-tools.sh --install-dir="$ANDROID_SDK_ROOT" --sdk-tools-version="7504922"
-          echo "y" | sdkmanager --licenses
-          sdkmanager "build-tools;30.0.3" "platforms;android-30" "platforms;android-28"
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallPackage 'git' 'openjdk11' 'python' 'visualstudiocode'
 
-      - name: Install iOS Dependencies
+      - name: Install Python packages
         run: |
-          sudo gem install cocoapods
-          pod --version
-          pod repo update
-          cd ios
-          pod install
-          cd ..
+          python -m pip install --upgrade pip wheel
 
-      - name: Cache Pub Dependencies
-        uses: actions/cache@v2
-        with:
-          path: $FLUTTER_HOME/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
-      - name: Get Flutter dependencies
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
-
-  build-and-deploy:
-    needs: setup-environment
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable' # Or 'beta', 'dev', or 'master'
-
-      - name: Build iOS IPA
+      - name: Install Flutter
         run: |
-          flutter build ios --release --no-codesign
-          cd ios
-          export CODESIGNING_FOLDER=$(flutter config --enable-ios-codesigning --output-dir)
-          export IPA_OUTPUT_PATH=$CODESIGNING_FOLDER/Runner.ipa
-          fastlane build_app
-          cp $IPA_OUTPUT_PATH ../build/ios/app.ipa
-        working-directory: ./flutter_project
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallFlutter "${{ matrix.flutter_path }}"
 
-      - name: Build Android APK
-        run: flutter build apk --release
-        working-directory: ./flutter_project
+      - name: Install Android SDK
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallAndroidSDK
 
-      - name: Deploy to App Store and Google Play
-        uses: wzieba/Deploy-Flutter-App@v1
-        with:
-          ios-distribution-certificate: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
-          ios-distribution-provisioning-profile: ${{ secrets.IOS_DISTRIBUTION_PROVISIONING_PROFILE }}
-          ios-app-identifier: ${{ secrets.IOS_APP_IDENTIFIER }}
-          google-play-json-base64: ${{ secrets.GOOGLE_PLAY_JSON }}
-          service-account-email: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+      - name: Install Build Tools
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallBuildTools
+
+      - name: Install Chrome
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -InstallChrome
+
+      - name: Check Flutter setup and fix issues
+        run: |
+          powershell -ExecutionPolicy Bypass -File .\setup_flutter_env.ps1 -CheckFlutterDoctor
